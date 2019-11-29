@@ -1,8 +1,10 @@
 package knockoff
 
 import org.scalatest._
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
-class SpanConverterSpec extends FunSpec with Matchers {
+class SpanConverterSpec extends AnyFunSpec with Matchers {
 
   def convert( txt : String ) : List[Span] = convert( txt, Nil )
 

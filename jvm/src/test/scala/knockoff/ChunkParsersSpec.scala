@@ -1,8 +1,10 @@
 package knockoff
 
 import org.scalatest._
+import org.scalatest.funspec.AnyFunSpecLike
+import org.scalatest.matchers.should.Matchers
 
-class ChunkParsersSpec extends ChunkParser with FunSpecLike with Matchers {
+class ChunkParsersSpec extends ChunkParser with AnyFunSpecLike with Matchers {
 
   describe("ChunkParser") {
     it("should handle simple bullet items") {

@@ -6,8 +6,10 @@ import org.scalatest._
 import org.w3c.tidy.Tidy
 import scala.collection.mutable.ListBuffer
 import scala.xml.{ Node, XML }
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
-class KnockoffIntegrationTests extends FunSpec with Matchers {
+class KnockoffIntegrationTests extends AnyFunSpec with Matchers {
 
 
   val basedir = "jvm/src/test/resources/tests"

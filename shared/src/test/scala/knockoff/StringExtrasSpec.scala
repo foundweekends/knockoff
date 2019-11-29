@@ -1,8 +1,10 @@
 package knockoff
 
 import org.scalatest._
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
-class StringExtrasSpec extends FunSpec with Matchers with StringExtras {
+class StringExtrasSpec extends AnyFunSpec with Matchers with StringExtras {
 
   describe("StringExtras") {
     it( "should find two different groups of the same time" ) {
