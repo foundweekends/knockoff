@@ -122,10 +122,16 @@ val knockoff = crossProject(JVMPlatform, JSPlatform)
   )
   .jsSettings(
     xmlVersion := "2.0.0-M2",
-    scalacOptions += {
+    scalacOptions ++= {
       val a = (baseDirectory in LocalRootProject).value.toURI.toString
       val g = "https://raw.githubusercontent.com/foundweekends/knockoff/" + tagOrHash.value
-      s"-P:scalajs:mapSourceURI:$a->$g/"
+      if (isDottyJS.value) {
+        // TODO
+        // https://github.com/lampepfl/dotty/blob/4c99388e77be12ee6cc/compiler/src/dotty/tools/backend/sjs/JSPositions.scala#L64-L69
+        Nil
+      } else {
+        Seq(s"-P:scalajs:mapSourceURI:$a->$g/")
+      }
     },
   )
   .jvmSettings(

@@ -13,8 +13,7 @@ matrix:
   - scala: 2.12.12
     jdk: openjdk11
   - name: dotty
-    script:
-    - sbt "project knockoffJVM" "++ 0.27.0-RC1!" test
+    scala: "0.27.0-RC1"
 cache:
   directories:
   - $HOME/.ivy2/cache
