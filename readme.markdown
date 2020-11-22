@@ -1,6 +1,5 @@
 # Knockoff - Markdown in Scala
 
-[![Build Status](https://travis-ci.com/foundweekends/knockoff.svg?branch=master)](https://travis-ci.com/foundweekends/knockoff)
 [![scaladoc](http://javadoc-badge.appspot.com/org.foundweekends/knockoff_2.12.svg?label=scaladoc)](http://javadoc-badge.appspot.com/org.foundweekends/knockoff_2.12/knockoff/index.html?javadocio=true)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.foundweekends/knockoff_2.12/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.foundweekends/knockoff_2.12)
 

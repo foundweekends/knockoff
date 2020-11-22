@@ -42,7 +42,7 @@ val commonSettings = Def.settings(
     pushChanges
   ),
   scalaVersion := Scala212,
-  crossScalaVersions := Seq(Scala212, "2.13.3"),
+  crossScalaVersions := Seq(Scala212, "2.13.4"),
   organization := "org.foundweekends",
   scalacOptions in (Compile, doc) ++= {
     val base = (baseDirectory in LocalRootProject).value.getAbsolutePath
@@ -78,8 +78,12 @@ val knockoff = crossProject(JVMPlatform, JSPlatform)
     buildInfoPackage := "knockoff",
     buildInfoObject := "KnockoffBuildInfo",
     name := "knockoff",
-    libraryDependencies += {
-      "org.scalatest" %%% "scalatest" % "3.2.2" % "test"
+    libraryDependencies ++= {
+      if (isDottyJS.value) {
+        Nil
+      } else {
+        Seq("org.scalatest" %%% "scalatest" % "3.2.3" % "test")
+      }
     },
     libraryDependencies ++= Seq(
       "net.sf.jtidy" % "jtidy" % "r938" % "test"
