@@ -30,7 +30,7 @@ jobs:
             sbt -v "+ test"
             ;;
           "scala_3")
-            sbt -v '++ 3.0.0-M1!' knockoffJVM/test
+            sbt -v '++ 3.0.0-M2!' knockoffJVM/test
             ;;
           *)
             echo "unknown job"
