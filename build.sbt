@@ -109,12 +109,12 @@ val knockoff = crossProject(JVMPlatform, JSPlatform)
         <developer>
           <id>xuwei-k</id>
           <name>Kenji Yoshida</name>
-          <url>http://github.com/xuwei-k</url>
+          <url>https://github.com/xuwei-k</url>
         </developer>
         <developer>
           <id>tjuricek</id>
           <name>Tristan Juricek</name>
-          <url>http://tristanjuricek.com</url>
+          <url>https://tristanjuricek.com</url>
         </developer>
       </developers>
     ),
