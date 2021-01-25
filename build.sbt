@@ -5,7 +5,7 @@ val tagName = Def.setting{
   s"v${if (releaseUseGlobalVersion.value) (version in ThisBuild).value else version.value}"
 }
 
-val Scala212 = "2.12.12"
+val Scala212 = "2.12.13"
 
 val tagOrHash = Def.setting {
   if(isSnapshot.value) sys.process.Process("git rev-parse HEAD").lineStream_!.head
