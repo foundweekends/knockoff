@@ -126,7 +126,7 @@ val knockoff = crossProject(JVMPlatform, JSPlatform)
   )
   .jsSettings(
     xmlVersion := "2.0.0-M3",
-    scalacOptions ++= {
+    scalacOptions += {
       val a = (baseDirectory in LocalRootProject).value.toURI.toString
       val g = "https://raw.githubusercontent.com/foundweekends/knockoff/" + tagOrHash.value
       val key = CrossVersion.partialVersion(scalaVersion.value) match {
