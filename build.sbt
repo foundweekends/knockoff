@@ -16,9 +16,6 @@ val unusedWarnings = Def.setting(
   Seq("-Ywarn-unused:imports")
 )
 
-val parserCombinatorsVersion = settingKey[String]("")
-val xmlVersion = settingKey[String]("")
-
 val commonSettings = Def.settings(
   releaseTagName := tagName.value,
   releaseCrossBuild := true,
@@ -79,7 +76,7 @@ val knockoff = crossProject(JVMPlatform, JSPlatform)
     buildInfoObject := "KnockoffBuildInfo",
     name := "knockoff",
     libraryDependencies ++= {
-      Seq("org.scalatest" %%% "scalatest" % "3.2.5" % "test")
+      Seq("org.scalatest" %%% "scalatest" % "3.2.6" % "test")
     },
     libraryDependencies ++= Seq(
       "net.sf.jtidy" % "jtidy" % "r938" % "test"
@@ -114,14 +111,12 @@ val knockoff = crossProject(JVMPlatform, JSPlatform)
         </developer>
       </developers>
     ),
-    parserCombinatorsVersion := "1.1.2",
     libraryDependencies ++= Seq(
-      "org.scala-lang.modules" %%% "scala-xml" % xmlVersion.value,
-      "org.scala-lang.modules" %%% "scala-parser-combinators" % parserCombinatorsVersion.value
-    ).map(_.withDottyCompat(scalaVersion.value))
+      "org.scala-lang.modules" %%% "scala-xml" % "2.0.0-M5",
+      "org.scala-lang.modules" %%% "scala-parser-combinators" % "1.1.2" withDottyCompat scalaVersion.value
+    )
   )
   .jsSettings(
-    xmlVersion := "2.0.0-M5",
     scalacOptions += {
       val a = (baseDirectory in LocalRootProject).value.toURI.toString
       val g = "https://raw.githubusercontent.com/foundweekends/knockoff/" + tagOrHash.value
@@ -133,9 +128,6 @@ val knockoff = crossProject(JVMPlatform, JSPlatform)
       }
       s"${key}:$a->$g/"
     },
-  )
-  .jvmSettings(
-    xmlVersion := "1.3.0",
   )
 
 val jvm = knockoff.jvm
