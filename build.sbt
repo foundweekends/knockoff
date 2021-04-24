@@ -2,7 +2,7 @@ import sbtrelease.ReleaseStateTransformations._
 import sbtcrossproject.CrossPlugin.autoImport.crossProject
 
 val tagName = Def.setting{
-  s"v${if (releaseUseGlobalVersion.value) (version in ThisBuild).value else version.value}"
+  s"v${if (releaseUseGlobalVersion.value) (ThisBuild / version).value else version.value}"
 }
 
 val Scala212 = "2.12.13"
@@ -29,7 +29,7 @@ val commonSettings = Def.settings(
     ReleaseStep(
       action = { state =>
         val extracted = Project extract state
-        extracted.runAggregated(PgpKeys.publishSigned in Global in extracted.get(thisProjectRef), state)
+        extracted.runAggregated(extracted.get(thisProjectRef) / (Global / PgpKeys.publishSigned), state)
       },
       enableCrossBuild = true
     ),
@@ -41,8 +41,8 @@ val commonSettings = Def.settings(
   scalaVersion := Scala212,
   crossScalaVersions := Seq(Scala212, "2.13.5"),
   organization := "org.foundweekends",
-  scalacOptions in (Compile, doc) ++= {
-    val base = (baseDirectory in LocalRootProject).value.getAbsolutePath
+  (Compile / doc / scalacOptions) ++= {
+    val base = (LocalRootProject / baseDirectory).value.getAbsolutePath
     Seq(
       "-sourcepath",
       base,
@@ -61,7 +61,7 @@ val commonSettings = Def.settings(
     }
   },
   Seq(Compile, Test).flatMap(c =>
-    scalacOptions in (c, console) --= unusedWarnings.value
+    (c / console / scalacOptions) --= unusedWarnings.value
   ),
 )
 
@@ -83,7 +83,7 @@ val knockoff = crossProject(JVMPlatform, JSPlatform)
     ),
     publishMavenStyle := true,
     publishTo := sonatypePublishToBundle.value,
-    publishArtifact in Test := false,
+    Test / publishArtifact := false,
     pomIncludeRepository := { _ => false },
     pomExtra := (
       <url>https://github.com/foundweekends/knockoff</url>
@@ -118,7 +118,7 @@ val knockoff = crossProject(JVMPlatform, JSPlatform)
   )
   .jsSettings(
     scalacOptions += {
-      val a = (baseDirectory in LocalRootProject).value.toURI.toString
+      val a = (LocalRootProject / baseDirectory).value.toURI.toString
       val g = "https://raw.githubusercontent.com/foundweekends/knockoff/" + tagOrHash.value
       val key = CrossVersion.partialVersion(scalaVersion.value) match {
         case Some((3, _)) =>
@@ -134,7 +134,7 @@ val jvm = knockoff.jvm
 val js = knockoff.js
 
 lazy val notPublish = Seq(
-  skip in publish := true,
+  publish / skip := true,
   publishArtifact := false,
   publish := {},
   publishLocal := {},
