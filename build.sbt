@@ -113,7 +113,7 @@ val knockoff = crossProject(JVMPlatform, JSPlatform)
     ),
     libraryDependencies ++= Seq(
       "org.scala-lang.modules" %%% "scala-xml" % "2.0.0",
-      "org.scala-lang.modules" %%% "scala-parser-combinators" % "1.2.0-RC2"
+      "org.scala-lang.modules" %%% "scala-parser-combinators" % "2.0.0"
     )
   )
   .jsSettings(
