@@ -2,7 +2,6 @@ package knockoff
 
 import java.io._
 
-import org.scalatest._
 import org.w3c.tidy.Tidy
 import scala.collection.mutable.ListBuffer
 import scala.xml.{ Node, XML }

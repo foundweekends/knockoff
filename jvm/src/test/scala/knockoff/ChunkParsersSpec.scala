@@ -1,6 +1,5 @@
 package knockoff
 
-import org.scalatest._
 import org.scalatest.funspec.AnyFunSpecLike
 import org.scalatest.matchers.should.Matchers
 
