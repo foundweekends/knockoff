@@ -39,7 +39,7 @@ val commonSettings = Def.settings(
     pushChanges
   ),
   scalaVersion := Scala212,
-  crossScalaVersions := Seq(Scala212, "2.13.6", "3.0.2"),
+  crossScalaVersions := Seq(Scala212, "2.13.6", "3.1.0"),
   organization := "org.foundweekends",
   (Compile / doc / scalacOptions) ++= {
     val base = (LocalRootProject / baseDirectory).value.getAbsolutePath
