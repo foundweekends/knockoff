@@ -67,7 +67,7 @@ val commonSettings = Def.settings(
 
 commonSettings
 
-val knockoff = crossProject(JVMPlatform, JSPlatform)
+val knockoff = crossProject(JVMPlatform, JSPlatform, NativePlatform)
   .in(file("."))
   .enablePlugins(BuildInfoPlugin)
   .settings(
@@ -76,7 +76,11 @@ val knockoff = crossProject(JVMPlatform, JSPlatform)
     buildInfoObject := "KnockoffBuildInfo",
     name := "knockoff",
     libraryDependencies ++= {
-      Seq("org.scalatest" %%% "scalatest" % "3.2.11" % "test")
+      if (crossProjectPlatform.value == NativePlatform && scalaBinaryVersion.value == "3") {
+        Nil
+      } else {
+        Seq("org.scalatest" %%% "scalatest" % "3.2.11" % "test")
+      }
     },
     libraryDependencies ++= Seq(
       "net.sf.jtidy" % "jtidy" % "r938" % "test"
@@ -128,6 +132,15 @@ val knockoff = crossProject(JVMPlatform, JSPlatform)
       }
       s"${key}:$a->$g/"
     },
+  )
+  .nativeSettings(
+    Test / sources := {
+      if (scalaBinaryVersion.value == "3") {
+        Nil
+      } else {
+        (Test / sources).value
+      }
+    }
   )
 
 val jvm = knockoff.jvm
