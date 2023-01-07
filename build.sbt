@@ -76,7 +76,7 @@ val knockoff = crossProject(JVMPlatform, JSPlatform, NativePlatform)
     buildInfoObject := "KnockoffBuildInfo",
     name := "knockoff",
     libraryDependencies ++= {
-      Seq("org.scalatest" %%% "scalatest" % "3.2.14" % "test")
+      Seq("org.scalatest" %%% "scalatest" % "3.2.15" % "test")
     },
     libraryDependencies ++= Seq(
       "net.sf.jtidy" % "jtidy" % "r938" % "test"
