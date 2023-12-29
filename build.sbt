@@ -53,6 +53,14 @@ val commonSettings = Def.settings(
   scalacOptions ++= unusedWarnings.value,
   scalacOptions ++= Seq("-language:_", "-deprecation", "-Xlint"),
   scalacOptions ++= {
+    scalaBinaryVersion.value match {
+      case "3" =>
+        Nil
+      case _ =>
+        Seq("-Xsource:3")
+    }
+  },
+  scalacOptions ++= {
     CrossVersion.partialVersion(scalaVersion.value) match {
       case Some((2, v)) if v <= 12 =>
         Seq("-Xfuture")
