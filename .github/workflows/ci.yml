@@ -20,5 +20,6 @@ jobs:
         distribution: adopt
     - uses: actions/checkout@v4
     - uses: coursier/cache-action@v6
+    - uses: sbt/setup-sbt@v1
     - shell: bash
       run: sbt -v "+ test"
