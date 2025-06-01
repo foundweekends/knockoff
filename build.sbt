@@ -33,7 +33,7 @@ val commonSettings = Def.settings(
       },
       enableCrossBuild = true
     ),
-    releaseStepCommandAndRemaining("sonatypeBundleRelease"),
+    releaseStepCommandAndRemaining("sonaRelease"),
     setNextVersion,
     commitNextVersion,
     pushChanges
@@ -93,7 +93,7 @@ val knockoff = crossProject(JVMPlatform, JSPlatform, NativePlatform)
       "net.sf.jtidy" % "jtidy" % "r938" % "test"
     ),
     publishMavenStyle := true,
-    publishTo := sonatypePublishToBundle.value,
+    publishTo := (if (isSnapshot.value) None else localStaging.value),
     Test / publishArtifact := false,
     pomIncludeRepository := { _ => false },
     pomExtra := (
