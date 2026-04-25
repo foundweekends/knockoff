@@ -1,5 +1,4 @@
 import sbtrelease.ReleaseStateTransformations._
-import sbtcrossproject.CrossPlugin.autoImport.crossProject
 
 val tagName = Def.setting {
   s"v${if (releaseUseGlobalVersion.value) (ThisBuild / version).value else version.value}"
@@ -16,9 +15,10 @@ val unusedWarnings = Def.setting(
   Seq("-Ywarn-unused:imports")
 )
 
+val scalaVersions = Seq(Scala212, "2.13.18", "3.3.7")
+
 val commonSettings = Def.settings(
   releaseTagName := tagName.value,
-  releaseCrossBuild := true,
   releaseProcess := Seq[ReleaseStep](
     checkSnapshotDependencies,
     inquireVersions,
@@ -26,20 +26,12 @@ val commonSettings = Def.settings(
     setReleaseVersion,
     commitReleaseVersion,
     tagRelease,
-    ReleaseStep(
-      action = { state =>
-        val extracted = Project extract state
-        extracted.runAggregated(extracted.get(thisProjectRef) / (Global / PgpKeys.publishSigned), state)
-      },
-      enableCrossBuild = true
-    ),
+    releaseStepCommandAndRemaining("publishSigned"),
     releaseStepCommandAndRemaining("sonaRelease"),
     setNextVersion,
     commitNextVersion,
     pushChanges
   ),
-  scalaVersion := Scala212,
-  crossScalaVersions := Seq(Scala212, "2.13.18", "3.3.7"),
   organization := "org.foundweekends",
   (Compile / doc / scalacOptions) ++= {
     val base = (LocalRootProject / baseDirectory).value.getAbsolutePath
@@ -75,11 +67,14 @@ val commonSettings = Def.settings(
 
 commonSettings
 
-val knockoff = crossProject(JVMPlatform, JSPlatform, NativePlatform)
+val knockoff = projectMatrix
   .in(file("."))
+  .defaultAxes()
   .enablePlugins(BuildInfoPlugin)
   .settings(
     commonSettings,
+    Compile / scalaSource := file("shared/src/main/scala").getAbsoluteFile,
+    Test / scalaSource := file("shared/src/test/scala").getAbsoluteFile,
     buildInfoPackage := "knockoff",
     buildInfoObject := "KnockoffBuildInfo",
     name := "knockoff",
@@ -125,7 +120,15 @@ val knockoff = crossProject(JVMPlatform, JSPlatform, NativePlatform)
       "org.scala-lang.modules" %%% "scala-parser-combinators" % "2.4.0"
     )
   )
-  .jsSettings(
+  .jvmPlatform(
+    scalaVersions,
+    Def.settings(
+      Compile / unmanagedSourceDirectories += file("jvm/src/main/scala").getAbsoluteFile,
+      Test / unmanagedSourceDirectories += file("jvm/src/test/scala").getAbsoluteFile,
+    )
+  )
+  .jsPlatform(
+    scalaVersions,
     scalacOptions += {
       val a = (LocalRootProject / baseDirectory).value.toURI.toString
       val g = "https://raw.githubusercontent.com/foundweekends/knockoff/" + tagOrHash.value
@@ -138,9 +141,9 @@ val knockoff = crossProject(JVMPlatform, JSPlatform, NativePlatform)
       s"${key}:$a->$g/"
     },
   )
-
-val jvm = knockoff.jvm
-val js = knockoff.js
+  .nativePlatform(
+    scalaVersions
+  )
 
 lazy val notPublish = Seq(
   publish / skip := true,

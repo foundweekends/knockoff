@@ -48,6 +48,7 @@ class KnockoffIntegrationTests extends AnyFunSpec with Matchers {
         def accept(f: File) = f.getName endsWith fromExt
       }
       val files = wrapped.listFiles(endsWithFrom)
+      assert(files.nonEmpty)
       val mapName: File => File =
         from => file(from.getParent, from.getName.replace(fromExt, toExt))
       files.map(f => (f, mapName(f)))
