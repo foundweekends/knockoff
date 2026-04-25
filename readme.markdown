@@ -1,8 +1,7 @@
 # Knockoff - Markdown in Scala
 
 [![scaladoc](https://javadoc.io/badge2/org.foundweekends/knockoff_3/javadoc.svg)](https://javadoc.io/doc/org.foundweekends/knockoff_3)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.foundweekends/knockoff_2.12/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.foundweekends/knockoff_2.12)
-
+[![Maven Central](https://img.shields.io/maven-central/v/org.foundweekends/knockoff_3)](https://central.sonatype.com/artifact/org.foundweekends/knockoff_3)
 
 This is a simple Markdown to object model to XHTML system.
 
