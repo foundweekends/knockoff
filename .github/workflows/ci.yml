@@ -22,4 +22,7 @@ jobs:
     - uses: coursier/cache-action@v8
     - uses: sbt/setup-sbt@v1
     - shell: bash
-      run: sbt -v "+ test"
+      run: sbt -v
+           scalafmtSbtCheck
+           "+ scalafmtCheckAll"
+           "+ test"

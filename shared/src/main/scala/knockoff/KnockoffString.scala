@@ -5,7 +5,7 @@ import scala.collection.mutable.ListBuffer
 
 class KnockoffString(val wrapped: String) extends AnyVal {
 
-  def substringOption (start: Int, finish: Int): Option[String] =
+  def substringOption(start: Int, finish: Int): Option[String] =
     if (start < finish) Some(wrapped.substring(start, finish))
     else None
 
@@ -15,8 +15,7 @@ class KnockoffString(val wrapped: String) extends AnyVal {
   /** Return the next N indices of a string where the sequence is found.
     *
     * @return A list of size n if found, otherwise Nil */
-  def nextNIndicesOf (n: Int, str: String, escape: Option[Char])
-  : List[Int] = {
+  def nextNIndicesOf(n: Int, str: String, escape: Option[Char]): List[Int] = {
     val found = nextIndexOfN(n, str, -1, new ListBuffer, escape)
     if (found.length == n) found else Nil
   }
@@ -30,16 +29,22 @@ class KnockoffString(val wrapped: String) extends AnyVal {
     * @param current The indexes we've found so far.
     * @param escape  If set, ignore sequences that have this character
     *                preceding it. */
-  private def nextIndexOfN (left: Int, str: String, index: Int,
-                            current: ListBuffer[Int], escape: Option[Char])
-  : List[Int] = {
+  private def nextIndexOfN(
+    left: Int,
+    str: String,
+    index: Int,
+    current: ListBuffer[Int],
+    escape: Option[Char]
+  ): List[Int] = {
     if (left <= 0 || index >= wrapped.length) {
       current.toList
     } else {
       val next = wrapped.indexOf(str, index)
 
-      if (next > 0 && escape.isDefined &&
-        wrapped.charAt(next - 1) == escape.get) {
+      if (
+        next > 0 && escape.isDefined &&
+        wrapped.charAt(next - 1) == escape.get
+      ) {
         nextIndexOfN(left, str, next + str.length, current, escape)
       } else {
         if (next >= 0) current += next
@@ -50,7 +55,7 @@ class KnockoffString(val wrapped: String) extends AnyVal {
   }
 
   /** Locates proper parenthetical sequences in a string. */
-  def findBalanced (open: Char, close: Char, start: Int): Option[Int] = {
+  def findBalanced(open: Char, close: Char, start: Int): Option[Int] = {
     val nextOpen = wrapped.indexOf(open, start)
     if ((nextOpen == -1) || (wrapped.length == nextOpen + 1)) {
       None
@@ -61,9 +66,7 @@ class KnockoffString(val wrapped: String) extends AnyVal {
 
   /** Recursive method for paren matching that is initialized by
     *findBalanced. */
-  private def findBalancedClose (count: Int, open: Char, close: Char,
-                                 index: Int)
-  : Option[Int] = {
+  private def findBalancedClose(count: Int, open: Char, close: Char, index: Int): Option[Int] = {
     if (wrapped.length <= index) {
       None
     } else {
@@ -85,11 +88,11 @@ class KnockoffString(val wrapped: String) extends AnyVal {
     }
   }
 
-  def countLeading (ch: Char): Int = {
+  def countLeading(ch: Char): Int = {
     val len = wrapped.length
     @tailrec
     def loop(total: Int): Int = {
-      if(len <= total) {
+      if (len <= total) {
         total
       } else if (wrapped.charAt(total) != ch) {
         total
@@ -100,6 +103,6 @@ class KnockoffString(val wrapped: String) extends AnyVal {
     loop(0)
   }
 
-  def trimChars (ch: Char): String =
+  def trimChars(ch: Char): String =
     ("^" + ch + "+(.*?\\s?)" + ch + "*+$").r.replaceFirstIn(wrapped, "$1")
 }

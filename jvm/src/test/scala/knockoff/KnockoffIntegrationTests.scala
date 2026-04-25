@@ -4,64 +4,62 @@ import java.io._
 
 import org.w3c.tidy.Tidy
 import scala.collection.mutable.ListBuffer
-import scala.xml.{ Node, XML }
+import scala.xml.{Node, XML}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
 class KnockoffIntegrationTests extends AnyFunSpec with Matchers {
-
 
   val basedir = "jvm/src/test/resources/tests"
 
   val jtidy = {
     val tidy = new Tidy
     tidy.setXmlOut(true)
-    tidy.setShowWarnings( false )
-    tidy.setShowErrors( 0 )
-    tidy.setQuiet( true )
-    tidy.setForceOutput( true )
+    tidy.setShowWarnings(false)
+    tidy.setShowErrors(0)
+    tidy.setQuiet(true)
+    tidy.setForceOutput(true)
     tidy
   }
 
-  def file( src : String, child : String ) = new File( src, child )
+  def file(src: String, child: String) = new File(src, child)
 
-  def writeString( node : Node ) : String = {
+  def writeString(node: Node): String = {
     val sw = new StringWriter
-    XML.write( sw, node, "UTF-8", false, null )
+    XML.write(sw, node, "UTF-8", false, null)
     sw.toString
   }
 
-  def tidy( src : String ) = {
-    val reader = new StringReader( src )
+  def tidy(src: String) = {
+    val reader = new StringReader(src)
     val writer = new StringWriter
-    jtidy.parse( reader, writer )
-    XML.loadString( writer.toString )
+    jtidy.parse(reader, writer)
+    XML.loadString(writer.toString)
   }
 
-  def normalizeSpace( str : String ) : String =
-    str.replaceAll( "\\s+", " " )
+  def normalizeSpace(str: String): String =
+    str.replaceAll("\\s+", " ")
 
-  implicit class FileHelper( wrapped : File ) {
+  implicit class FileHelper(wrapped: File) {
 
     /** Try to match files based on the fromExt to the toExt. */
-    def listTests( fromExt : String, toExt : String ) : Seq[ (File, File) ] = {
+    def listTests(fromExt: String, toExt: String): Seq[(File, File)] = {
       val endsWithFrom = new FileFilter {
-        def accept( f : File ) = f.getName endsWith fromExt
+        def accept(f: File) = f.getName endsWith fromExt
       }
-      val files = wrapped.listFiles( endsWithFrom )
-      val mapName : File => File =
-        from => file( from.getParent,
-                      from.getName.replace( fromExt, toExt ) )
-      files.map( f => (f, mapName(f)) )
+      val files = wrapped.listFiles(endsWithFrom)
+      val mapName: File => File =
+        from => file(from.getParent, from.getName.replace(fromExt, toExt))
+      files.map(f => (f, mapName(f)))
     }
 
     /** A version that will actually compile under 2.8. */
-    def text : String = {
-      val reader = new BufferedReader( new FileReader( wrapped ) )
+    def text: String = {
+      val reader = new BufferedReader(new FileReader(wrapped))
       val lines = new ListBuffer[String]
       try {
         var line = reader.readLine
-        while( line != null ) {
+        while (line != null) {
           lines += line
           line = reader.readLine
         }
@@ -73,29 +71,28 @@ class KnockoffIntegrationTests extends AnyFunSpec with Matchers {
   }
 
   // Skipped because attributes are printed in order causing test failures
-  describe( "Discounter" ) {
+  describe("Discounter") {
     import DefaultDiscounter._
-    it( "should convert tests from Markdown to XHTML" ) {
-      val dir = file( basedir, "discounter_markdown-xhtml" )
+    it("should convert tests from Markdown to XHTML") {
+      val dir = file(basedir, "discounter_markdown-xhtml")
       dir.listTests(".text", ".html").foreach { case (from, to) =>
-        from should be (Symbol("exists"))
-        to should be (Symbol("exists"))
-        println( "Test: " + from.getName )
-        val fromXHTML = writeString( toXHTML( knockoff( from.text ) ) )
-        //tidy( fromXHTML ) should equal ( tidy( to.text ) )
+        from should be(Symbol("exists"))
+        to should be(Symbol("exists"))
+        println("Test: " + from.getName)
+        val fromXHTML = writeString(toXHTML(knockoff(from.text)))
+      // tidy( fromXHTML ) should equal ( tidy( to.text ) )
       }
     }
 
-    it( "should convert tests from Markdown to plain text" ) {
-      val dir = file( basedir, "discounter_markdown-text" )
+    it("should convert tests from Markdown to plain text") {
+      val dir = file(basedir, "discounter_markdown-text")
       dir.listTests(".markdown", ".txt").foreach { case (from, to) =>
-        from should be (Symbol("exists"))
-        to should be (Symbol("exists"))
-        println( "Test: " + from.getName )
-        val fromText = normalizeSpace( toText( knockoff( from.text ) ) )
-        fromText should equal ( normalizeSpace( to.text ) )
+        from should be(Symbol("exists"))
+        to should be(Symbol("exists"))
+        println("Test: " + from.getName)
+        val fromText = normalizeSpace(toText(knockoff(from.text)))
+        fromText should equal(normalizeSpace(to.text))
       }
     }
   }
 }
-

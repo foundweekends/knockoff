@@ -1,14 +1,14 @@
 import sbtrelease.ReleaseStateTransformations._
 import sbtcrossproject.CrossPlugin.autoImport.crossProject
 
-val tagName = Def.setting{
+val tagName = Def.setting {
   s"v${if (releaseUseGlobalVersion.value) (ThisBuild / version).value else version.value}"
 }
 
 val Scala212 = "2.12.21"
 
 val tagOrHash = Def.setting {
-  if(isSnapshot.value) sys.process.Process("git rev-parse HEAD").lineStream_!.head
+  if (isSnapshot.value) sys.process.Process("git rev-parse HEAD").lineStream_!.head
   else tagName.value
 }
 
@@ -70,9 +70,7 @@ val commonSettings = Def.settings(
         Nil
     }
   },
-  Seq(Compile, Test).flatMap(c =>
-    (c / console / scalacOptions) --= unusedWarnings.value
-  ),
+  Seq(Compile, Test).flatMap(c => (c / console / scalacOptions) --= unusedWarnings.value),
 )
 
 commonSettings
