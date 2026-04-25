@@ -29,8 +29,8 @@ done.
 Breaks the markdown document into a Stream of `Chunk`s, so that later
 recognition can function. This means this
 
-* Identifies the major boundaries of block elments
-* Figures out the `LinkDefinition`s. Those are needed for Span recognition.
+ * Identifies the major boundaries of block elments
+ * Figures out the `LinkDefinition`s. Those are needed for Span recognition.
 
 When we run into something we can't parse, there's a simple rule; go on. If I
 detect that there will be more and more problems, well. Hm.
@@ -42,14 +42,14 @@ Notably, this remembers the position of each chunk in the input.
 The whole process is wrapped by a "factory" which mostly handles continuing past
 any errors in the document if possible. Errors are logged and we move ahead.
 
-*/
+ */
 
 package knockoff
 
 import scala.annotation.tailrec
 import scala.util.parsing.input.{CharSequenceReader, Position, Reader}
 
-trait ChunkStreamFactory  {
+trait ChunkStreamFactory {
 
   /** Overridable factory method. */
   def newChunkParser: ChunkParser = new ChunkParser
@@ -85,7 +85,7 @@ trait ChunkStreamFactory  {
 Mostly, this is a series of regular expressions built to find the next chunk in
 a markdown document.
 
-*/
+ */
 
 import scala.util.parsing.combinator.RegexParsers
 
@@ -109,41 +109,41 @@ class ChunkParser extends RegexParsers with StringExtras {
     """[\t ]*""".r ^^ (str => EmptySpace(str))
 
   def textBlockWithBreak: Parser[Chunk] =
-    rep(textLineWithEnd) ~ hardBreakTextLine ^^ {
-      case seq ~ break => TextChunk(foldedString(seq) + break.content)
+    rep(textLineWithEnd) ~ hardBreakTextLine ^^ { case seq ~ break =>
+      TextChunk(foldedString(seq) + break.content)
     }
 
   def textBlock: Parser[Chunk] =
-    rep1(textLine) ^^ {
-      seq => TextChunk(foldedString(seq))
+    rep1(textLine) ^^ { seq =>
+      TextChunk(foldedString(seq))
     }
 
   /** Match any line up until it ends with a newline. */
   def textLine: Parser[Chunk] =
-    """[\t ]*\S[^\n]*\n?""".r ^^ {
-      str => TextChunk(str)
+    """[\t ]*\S[^\n]*\n?""".r ^^ { str =>
+      TextChunk(str)
     }
 
   def textLineWithEnd: Parser[Chunk] =
-    """[\t ]*\S[^\n]*[^ \n][ ]?\n""".r ^^ {
-      str => TextChunk(str)
+    """[\t ]*\S[^\n]*[^ \n][ ]?\n""".r ^^ { str =>
+      TextChunk(str)
     }
 
   def hardBreakTextLine: Parser[Chunk] =
-    """[\t ]*\S[^\n]*[ ]{2}\n""".r ^^ {
-      s => TextChunk(s)
+    """[\t ]*\S[^\n]*[ ]{2}\n""".r ^^ { s =>
+      TextChunk(s)
     }
 
   def bulletItem: Parser[Chunk] =
-    bulletLead ~ rep(trailingLine) ^^ {
-      case ~(lead, texts) => BulletLineChunk(foldedString(lead :: texts))
+    bulletLead ~ rep(trailingLine) ^^ { case ~(lead, texts) =>
+      BulletLineChunk(foldedString(lead :: texts))
     }
 
   /** Match a single line that is likely a bullet item. */
   def bulletLead: Parser[Chunk] =
-  // """[ ]{0,3}[*\-+](\t|[ ]{0,4})""".r ~> not("[*\\-+]".r) ~> textLine ^^ {
-    """[ ]{0,3}[*\-+](\t|[ ]{0,4})""".r ~> textLine ^^ {
-      textChunk => BulletLineChunk(textChunk.content)
+    // """[ ]{0,3}[*\-+](\t|[ ]{0,4})""".r ~> not("[*\\-+]".r) ~> textLine ^^ {
+    """[ ]{0,3}[*\-+](\t|[ ]{0,4})""".r ~> textLine ^^ { textChunk =>
+      BulletLineChunk(textChunk.content)
     }
 
   /** A special case where an emphasis marker, using an asterix, on the first word
@@ -151,8 +151,8 @@ class ChunkParser extends RegexParsers with StringExtras {
       here that have an even number of asterixes, because if it's odd, well, you
       probably have an asterix line indicator followed by an emphasis. */
   def leadingEmTextBlock: Parser[Chunk] =
-    """[ ]{0,3}\*""".r ~ notEvenAsterixes ~ rep(textLine) ^^ {
-      case ~(~(emLine, s), textSeq) => TextChunk(emLine + s + foldedString(textSeq))
+    """[ ]{0,3}\*""".r ~ notEvenAsterixes ~ rep(textLine) ^^ { case ~(~(emLine, s), textSeq) =>
+      TextChunk(emLine + s + foldedString(textSeq))
     }
 
   def notEvenAsterixes = new Parser[String] {
@@ -167,8 +167,7 @@ class ChunkParser extends RegexParsers with StringExtras {
     }
 
     @tailrec
-    def readLine(in: Reader[Char], sb: StringBuilder, count: Int)
-    : (String, Int, Reader[Char]) = {
+    def readLine(in: Reader[Char], sb: StringBuilder, count: Int): (String, Int, Reader[Char]) = {
       if (!in.atEnd) sb.append(in.first)
       if (in.atEnd || in.first == '\n') {
         (sb.toString, count, in.rest)
@@ -183,23 +182,22 @@ class ChunkParser extends RegexParsers with StringExtras {
   /** A special case where an emphasis marker on a word on a text block doesn't
       make the block a list item. */
   def leadingStrongTextBlock: Parser[Chunk] =
-    """[ ]{0,3}\*\*[^*\n]+\*\*[^\n]*\n?""".r ~ rep(textLine) ^^ {
-      case ~(strLine, textSeq) => TextChunk(strLine + foldedString(textSeq))
+    """[ ]{0,3}\*\*[^*\n]+\*\*[^\n]*\n?""".r ~ rep(textLine) ^^ { case ~(strLine, textSeq) =>
+      TextChunk(strLine + foldedString(textSeq))
     }
 
   def numberedItem: Parser[Chunk] =
-    numberedLead ~ rep(trailingLine) ^^ {
-      case ~(lead, texts) => NumberedLineChunk(foldedString(lead :: texts))
+    numberedLead ~ rep(trailingLine) ^^ { case ~(lead, texts) =>
+      NumberedLineChunk(foldedString(lead :: texts))
     }
 
   def numberedLead: Parser[Chunk] =
-    """[ ]{0,3}\d+\.(\t|[ ]{0,4})""".r ~> textLine ^^ {
-      textChunk => NumberedLineChunk(textChunk.content)
+    """[ ]{0,3}\d+\.(\t|[ ]{0,4})""".r ~> textLine ^^ { textChunk =>
+      NumberedLineChunk(textChunk.content)
     }
 
   def trailingLine: Parser[Chunk] =
-    """\t|[ ]{0,4}""".r ~> """[\S&&[^*\-+]&&[^\d]][^\n]*\n?""".r ^^ (
-      s => TextChunk(s))
+    """\t|[ ]{0,4}""".r ~> """[\S&&[^*\-+]&&[^\d]][^\n]*\n?""".r ^^ (s => TextChunk(s))
 
   def header: Parser[Chunk] =
     (setextHeaderEquals | setextHeaderDashes | atxHeader)
@@ -215,12 +213,11 @@ class ChunkParser extends RegexParsers with StringExtras {
   def dashesLine: Parser[Any] = """-+\n""".r
 
   def atxHeader: Parser[Chunk] =
-    """#+ .*\n?""".r ^^ (
-      s => HeaderChunk(s.countLeading('#'), s.trimChars('#').trim))
+    """#+ .*\n?""".r ^^ (s => HeaderChunk(s.countLeading('#'), s.trimChars('#').trim))
 
   def horizontalRule: Parser[Chunk] =
-    """[ ]{0,3}[*\-_][\t ]?[*\-_][\t ]?[*\-_][\t *\-_]*\n""".r ^^ {
-      s => HorizontalRuleChunk
+    """[ ]{0,3}[*\-_][\t ]?[*\-_][\t ]?[*\-_][\t *\-_]*\n""".r ^^ { s =>
+      HorizontalRuleChunk
     }
 
   def indentedChunk: Parser[Chunk] =
@@ -232,18 +229,16 @@ class ChunkParser extends RegexParsers with StringExtras {
   def emptyString: Parser[Chunk] = "".r ^^ (s => EmptySpace(s))
 
   def blockquote: Parser[Chunk] =
-    blockquotedLine ~ rep(blockquotedLine | textLine) ^^ {
-      case ~(lead, trailing) =>
-        BlockquotedChunk(foldedString(lead :: trailing))
+    blockquotedLine ~ rep(blockquotedLine | textLine) ^^ { case ~(lead, trailing) =>
+      BlockquotedChunk(foldedString(lead :: trailing))
     }
 
   def blockquotedLine: Parser[Chunk] =
     """^>[\t ]?""".r ~> (textLine | emptyLine)
 
   def linkDefinition: Parser[Chunk] =
-    linkIDAndURL ~ opt(linkTitle) <~ """[ ]*\n?""".r ^^ {
-      case ~(idAndURL, titleOpt) =>
-        LinkDefinitionChunk(idAndURL._1, idAndURL._2, titleOpt)
+    linkIDAndURL ~ opt(linkTitle) <~ """[ ]*\n?""".r ^^ { case ~(idAndURL, titleOpt) =>
+      LinkDefinitionChunk(idAndURL._1, idAndURL._2, titleOpt)
     }
 
   def htmlBlock = new Parser[Chunk] {
@@ -283,8 +278,13 @@ class ChunkParser extends RegexParsers with StringExtras {
     }
 
     @tailrec
-    def findEnd(in: Reader[Char], tagName: String, openCount: Int,
-                sb: StringBuilder, buf: StringBuilder): Option[(String, Reader[Char])] = {
+    def findEnd(
+      in: Reader[Char],
+      tagName: String,
+      openCount: Int,
+      sb: StringBuilder,
+      buf: StringBuilder
+    ): Option[(String, Reader[Char])] = {
       if (!in.atEnd) {
         sb.append(in.first)
         buf.append(in.first)
@@ -324,16 +324,15 @@ class ChunkParser extends RegexParsers with StringExtras {
   }
 
   private def linkIDAndURL: Parser[(String, String)] =
-    """[ ]{0,3}\[[^\[\]]*\]:[ ]+<?[\w\p{Punct}]+>?""".r ^^ {
-      linkString =>
-        val linkMatch = """^\[([^\[\]]+)\]:[ ]+<?([\w\p{Punct}]+)>?$""".r
-          .findFirstMatchIn(linkString.trim).get;
-        (linkMatch.group(1), linkMatch.group(2))
+    """[ ]{0,3}\[[^\[\]]*\]:[ ]+<?[\w\p{Punct}]+>?""".r ^^ { linkString =>
+      val linkMatch = """^\[([^\[\]]+)\]:[ ]+<?([\w\p{Punct}]+)>?$""".r.findFirstMatchIn(linkString.trim).get;
+      (linkMatch.group(1), linkMatch.group(2))
     }
 
   private def linkTitle: Parser[String] =
-    """\s*""".r ~> """["'(].*["')]""".r ^^ (// " <- My TextMate bundle fails here
-      str => str.substring(1, str.length - 1))
+    """\s*""".r ~> """["'(].*["')]""".r ^^ ( // " <- My TextMate bundle fails here
+      str => str.substring(1, str.length - 1)
+    )
 
   // Utility Methods
 
@@ -351,7 +350,7 @@ Chunks are used to capture the major blocks in the early stage, and then once
 we've grabbed the spanning elements of each block, to construct the final
 `Block` model.
 
-*/
+ */
 
 import scala.collection.mutable.ListBuffer
 
@@ -361,18 +360,24 @@ trait Chunk {
   def isLinkDefinition = false
 
   /** Create the Block and append to the list. */
-  def appendNewBlock(list: ListBuffer[Block],
-                     remaining: List[(Chunk, collection.Seq[Span], Position)],
-                     spans: collection.Seq[Span], position: Position,
-                     discounter: Discounter): Unit
+  def appendNewBlock(
+    list: ListBuffer[Block],
+    remaining: List[(Chunk, collection.Seq[Span], Position)],
+    spans: collection.Seq[Span],
+    position: Position,
+    discounter: Discounter
+  ): Unit
 }
 
 case class HTMLChunk(content: String) extends Chunk {
 
-  def appendNewBlock(list: ListBuffer[Block],
-                     remaining: List[(Chunk, collection.Seq[Span], Position)],
-                     spans: collection.Seq[Span], position: Position,
-                     discounter: Discounter): Unit = {
+  def appendNewBlock(
+    list: ListBuffer[Block],
+    remaining: List[(Chunk, collection.Seq[Span], Position)],
+    spans: collection.Seq[Span],
+    position: Position,
+    discounter: Discounter
+  ): Unit = {
     list += HTMLBlock(content, position)
   }
 }
@@ -384,16 +389,19 @@ case class HTMLChunk(content: String) extends Chunk {
 Represents a single level of blockquoted material. That means that it could also
 contain content, which is then reparsed, recursively.
 
-*/
+ */
 
 case class BlockquotedChunk(content: String) extends Chunk {
 
   /** @param content The material, not parsed, but also not containing this
                      level's '>' characters. */
-  def appendNewBlock(list: ListBuffer[Block],
-                     remaining: List[(Chunk, collection.Seq[Span], Position)],
-                     spans: collection.Seq[Span], position: Position,
-                     discounter: Discounter): Unit = {
+  def appendNewBlock(
+    list: ListBuffer[Block],
+    remaining: List[(Chunk, collection.Seq[Span], Position)],
+    spans: collection.Seq[Span],
+    position: Position,
+    discounter: Discounter
+  ): Unit = {
     val blocks = discounter.knockoff(content)
     list += Blockquote(blocks, position)
   }
@@ -409,23 +417,24 @@ end of a line.
 
 This does not cover forced line brakes.
 
-*/
+ */
 
 case class EmptySpace(content: String) extends Chunk {
 
-  def appendNewBlock(list: ListBuffer[Block],
-                     remaining: List[(Chunk, collection.Seq[Span], Position)],
-                     spans: collection.Seq[Span], position: Position,
-                     discounter: Discounter): Unit = {
+  def appendNewBlock(
+    list: ListBuffer[Block],
+    remaining: List[(Chunk, collection.Seq[Span], Position)],
+    spans: collection.Seq[Span],
+    position: Position,
+    discounter: Discounter
+  ): Unit = {
     (remaining, list) match {
       case (head :: tail, init :+ last) =>
         last match {
           case lastCB: CodeBlock =>
             head._1 match {
               case ice: IndentedChunk =>
-                list.update(list.length - 1,
-                  CodeBlock(Text(lastCB.text.content + "\n"),
-                    lastCB.position))
+                list.update(list.length - 1, CodeBlock(Text(lastCB.text.content + "\n"), lastCB.position))
               case _ => {}
             }
           case _ => {}
@@ -437,10 +446,13 @@ case class EmptySpace(content: String) extends Chunk {
 
 case class HeaderChunk(level: Int, content: String) extends Chunk {
 
-  def appendNewBlock(list: ListBuffer[Block],
-                     remaining: List[(Chunk, collection.Seq[Span], Position)],
-                     spans: collection.Seq[Span], position: Position,
-                     discounter: Discounter): Unit = {
+  def appendNewBlock(
+    list: ListBuffer[Block],
+    remaining: List[(Chunk, collection.Seq[Span], Position)],
+    spans: collection.Seq[Span],
+    position: Position,
+    discounter: Discounter
+  ): Unit = {
     list += Header(level, spans, position)
   }
 }
@@ -448,10 +460,13 @@ case class HeaderChunk(level: Int, content: String) extends Chunk {
 case object HorizontalRuleChunk extends Chunk {
   val content = "* * *\n"
 
-  def appendNewBlock(list: ListBuffer[Block],
-                     remaining: List[(Chunk, collection.Seq[Span], Position)],
-                     spans: collection.Seq[Span], position: Position,
-                     discounter: Discounter): Unit = {
+  def appendNewBlock(
+    list: ListBuffer[Block],
+    remaining: List[(Chunk, collection.Seq[Span], Position)],
+    spans: collection.Seq[Span],
+    position: Position,
+    discounter: Discounter
+  ): Unit = {
     list += HorizontalRule(position)
   }
 }
@@ -469,14 +484,17 @@ Otherwise, append it as a new code block. Two code blocks will get combined here
 Appending to the end of a list means that we strip out the first indent and
 reparse things.
 
-*/
+ */
 
 case class IndentedChunk(content: String) extends Chunk {
 
-  def appendNewBlock(list: ListBuffer[Block],
-                     remaining: List[(Chunk, collection.Seq[Span], Position)],
-                     spans: collection.Seq[Span], position: Position,
-                     discounter: Discounter): Unit = {
+  def appendNewBlock(
+    list: ListBuffer[Block],
+    remaining: List[(Chunk, collection.Seq[Span], Position)],
+    spans: collection.Seq[Span],
+    position: Position,
+    discounter: Discounter
+  ): Unit = {
     if (list.isEmpty) {
       spans.head match {
         case text: Text => list += CodeBlock(text, position)
@@ -497,8 +515,7 @@ case class IndentedChunk(content: String) extends Chunk {
         case CodeBlock(text, position) =>
           spans.head match {
             case next: Text =>
-              list.update(list.length - 1,
-                CodeBlock(Text(text.content + next.content), position))
+              list.update(list.length - 1, CodeBlock(Text(text.content + next.content), position))
           }
 
         case _ =>
@@ -510,29 +527,33 @@ case class IndentedChunk(content: String) extends Chunk {
   }
 }
 
-case class LinkDefinitionChunk(id: String, url: String,
-                               title: Option[String])
-  extends Chunk {
+case class LinkDefinitionChunk(id: String, url: String, title: Option[String]) extends Chunk {
 
   override def isLinkDefinition = true
 
   def content: String =
     "[" + id + "]: " + url + title.map(" \"" + _ + "\"").getOrElse("")
 
-  def appendNewBlock(list: ListBuffer[Block],
-                     remaining: List[(Chunk, collection.Seq[Span], Position)],
-                     spans: collection.Seq[Span], position: Position,
-                     discounter: Discounter): Unit = {
+  def appendNewBlock(
+    list: ListBuffer[Block],
+    remaining: List[(Chunk, collection.Seq[Span], Position)],
+    spans: collection.Seq[Span],
+    position: Position,
+    discounter: Discounter
+  ): Unit = {
     list += LinkDefinition(id, url, title, position)
   }
 }
 
 case class NumberedLineChunk(content: String) extends Chunk {
 
-  def appendNewBlock(list: ListBuffer[Block],
-                     remaining: List[(Chunk, collection.Seq[Span], Position)],
-                     spans: collection.Seq[Span], position: Position,
-                     discounter: Discounter): Unit = {
+  def appendNewBlock(
+    list: ListBuffer[Block],
+    remaining: List[(Chunk, collection.Seq[Span], Position)],
+    spans: collection.Seq[Span],
+    position: Position,
+    discounter: Discounter
+  ): Unit = {
     val li = OrderedItem(List(Paragraph(spans, position)), position)
     if (list.isEmpty) {
       list += OrderedList(List(li))
@@ -555,14 +576,17 @@ recognized a `Text` span that contains two spaces and a newline, we split the
 span sequence at this point into two lists, and then append two blocks. One of
 them will be an `HTMLSpan(<br/>)`
 
-*/
+ */
 
 case class TextChunk(content: String) extends Chunk {
 
-  def appendNewBlock(list: ListBuffer[Block],
-                     remaining: List[(Chunk, collection.Seq[Span], Position)],
-                     spans: collection.Seq[Span], position: Position,
-                     discounter: Discounter): Unit = {
+  def appendNewBlock(
+    list: ListBuffer[Block],
+    remaining: List[(Chunk, collection.Seq[Span], Position)],
+    spans: collection.Seq[Span],
+    position: Position,
+    discounter: Discounter
+  ): Unit = {
     def appendList = list += Paragraph(spans, position)
 
     if (list.isEmpty) {
@@ -573,8 +597,7 @@ case class TextChunk(content: String) extends Chunk {
           if (endsWithBreak(p.spans)) {
             list.trimEnd(1)
             list += appendBreakAndSpans(p.spans, spans, position)
-          }
-          else appendList
+          } else appendList
 
         case _ => appendList
       }
@@ -593,18 +616,24 @@ case class TextChunk(content: String) extends Chunk {
     }
   }
 
-  def appendBreakAndSpans(preSpans: collection.Seq[Span], tailSpans: collection.Seq[Span],
-                          position: Position): Paragraph = {
+  def appendBreakAndSpans(
+    preSpans: collection.Seq[Span],
+    tailSpans: collection.Seq[Span],
+    position: Position
+  ): Paragraph = {
     Paragraph(preSpans ++ List(HTMLSpan("<br/>\n")) ++ tailSpans, position)
   }
 }
 
 case class BulletLineChunk(content: String) extends Chunk {
 
-  def appendNewBlock(list: ListBuffer[Block],
-                     remaining: List[(Chunk, collection.Seq[Span], Position)],
-                     spans: collection.Seq[Span], position: Position,
-                     discounter: Discounter): Unit = {
+  def appendNewBlock(
+    list: ListBuffer[Block],
+    remaining: List[(Chunk, collection.Seq[Span], Position)],
+    spans: collection.Seq[Span],
+    position: Position,
+    discounter: Discounter
+  ): Unit = {
     val li = UnorderedItem(List(Paragraph(spans, position)), position)
     if (list.isEmpty) {
       list += UnorderedList(List(li))
@@ -643,27 +672,24 @@ the string. But on certain elements, the element itself contains a Span, so this
 converter configures that matcher to kick off another parsing run on the
 substring of that span.
 
-*/
-
+ */
 
 class SpanConverter(definitions: collection.Seq[LinkDefinitionChunk])
-  extends Function1[Chunk, collection.Seq[Span]] with StringExtras {
+    extends Function1[Chunk, collection.Seq[Span]]
+    with StringExtras {
 
   /*
     The primary result returned by a `SpanMatcher`. It's `index` will become an
     ordering attribute for determining the "best" match.
-  */
-  case class SpanMatch(index: Int, before: Option[Text], current: Span,
-                       after: Option[String])
-
+   */
+  case class SpanMatch(index: Int, before: Option[Text], current: Span, after: Option[String])
 
   /** @param delim The delimiter string to match the next 2 sequences of.
   @param toSpan Factory to create the actual SpanMatch.
   @param recursive If you want the contained element to be reconverted.
   @param escape If set, how you can escape this sequence. */
-  class DelimMatcher(delim: String, toSpan: collection.Seq[Span] => Span,
-                     recursive: Boolean, escape: Option[Char])
-    extends Function1[String, Option[SpanMatch]] {
+  class DelimMatcher(delim: String, toSpan: collection.Seq[Span] => Span, recursive: Boolean, escape: Option[Char])
+      extends Function1[String, Option[SpanMatch]] {
 
     def apply(source: String): Option[SpanMatch] = {
 
@@ -673,8 +699,9 @@ class SpanConverter(definitions: collection.Seq[LinkDefinitionChunk])
             None
           } else {
             val contained = source.substring(start + delim.length, end)
-            val content = if (recursive) convert(contained, Nil)
-            else List(Text(contained))
+            val content =
+              if (recursive) convert(contained, Nil)
+              else List(Text(contained))
             val before = source.substringOption(0, start).map(Text(_))
             val after = source.substringOption(end + delim.length, source.length)
             val mapped = toSpan(content)
@@ -701,14 +728,13 @@ class SpanConverter(definitions: collection.Seq[LinkDefinitionChunk])
     } else {
       val textOnly = SpanMatch(content.length, None, Text(content), None)
 
-      val best = matchers.foldLeft(textOnly) {
-        (current, findMatch) =>
-          findMatch(content) match {
-            case None => current
-            case Some(nextMatch) =>
-              if (nextMatch.index < current.index) nextMatch
-              else current
-          }
+      val best = matchers.foldLeft(textOnly) { (current, findMatch) =>
+        findMatch(content) match {
+          case None => current
+          case Some(nextMatch) =>
+            if (nextMatch.index < current.index) nextMatch
+            else current
+        }
       }
 
       val updated = current ::: best.before.toList ::: List(best.current)
@@ -721,11 +747,20 @@ class SpanConverter(definitions: collection.Seq[LinkDefinitionChunk])
   }
 
   def matchers: List[String => Option[SpanMatch]] = List(
-    matchDoubleCodes, matchSingleCodes, findReferenceMatch, findAutomaticMatch,
-    findNormalMatch, matchHTMLComment,
-    matchEntity, matchHTMLSpan, matchUnderscoreStrongAndEm,
-    matchAsterixStrongAndEm, matchUnderscoreStrong, matchAsterixStrong,
-    matchUnderscoreEmphasis, matchAsterixEmphasis
+    matchDoubleCodes,
+    matchSingleCodes,
+    findReferenceMatch,
+    findAutomaticMatch,
+    findNormalMatch,
+    matchHTMLComment,
+    matchEntity,
+    matchHTMLSpan,
+    matchUnderscoreStrongAndEm,
+    matchAsterixStrongAndEm,
+    matchUnderscoreStrong,
+    matchAsterixStrong,
+    matchUnderscoreEmphasis,
+    matchAsterixEmphasis
   )
 
   val matchUnderscoreEmphasis =
@@ -734,30 +769,23 @@ class SpanConverter(definitions: collection.Seq[LinkDefinitionChunk])
   val matchAsterixEmphasis =
     new DelimMatcher("*", Emphasis(_), true, Some('\\'))
 
-
   val matchUnderscoreStrong =
     new DelimMatcher("__", Strong(_), true, Some('\\'))
 
   val matchAsterixStrong =
     new DelimMatcher("**", Strong(_), true, Some('\\'))
 
-
   val matchUnderscoreStrongAndEm =
-    new DelimMatcher("___", seq => Strong(List(Emphasis(seq))), true,
-      Some('\\'))
+    new DelimMatcher("___", seq => Strong(List(Emphasis(seq))), true, Some('\\'))
 
   val matchAsterixStrongAndEm =
-    new DelimMatcher("***", seq => Strong(List(Emphasis(seq))), true,
-      Some('\\'))
+    new DelimMatcher("***", seq => Strong(List(Emphasis(seq))), true, Some('\\'))
 
   val matchDoubleCodes =
-    new DelimMatcher("``", s => CodeSpan(s.head.asInstanceOf[Text].content),
-      false, None)
+    new DelimMatcher("``", s => CodeSpan(s.head.asInstanceOf[Text].content), false, None)
 
   val matchSingleCodes =
-    new DelimMatcher("`", s => CodeSpan(s.head.asInstanceOf[Text].content),
-      false, None)
-
+    new DelimMatcher("`", s => CodeSpan(s.head.asInstanceOf[Text].content), false, None)
 
   /*
 
@@ -772,35 +800,31 @@ class SpanConverter(definitions: collection.Seq[LinkDefinitionChunk])
     situations where one span contains other spans - it's basically like
     parenthesis matching.
 
-  */
+   */
 
   private val startElement = """<[ ]*([a-zA-Z0-9:_]+)[ \t]*[^>]*?(/?+)>""".r
 
   def matchHTMLSpan(source: String): Option[SpanMatch] = {
-    startElement.findFirstMatchIn(source).map {
-      open =>
-        val hasEnd = open.group(2) == "/"
-        val before = open.before.toOption.map(Text(_))
-        val noEnd = SpanMatch(open.start, before, HTMLSpan(open.matched),
-          open.after.toOption)
-        if (!hasEnd) {
-          hasMatchedClose(source, open.group(1), open.end, 1) match {
-            case Some((close, after)) =>
-              val before = open.before.toOption.map(Text(_))
-              val html = HTMLSpan(source.substring(open.start, close))
-              SpanMatch(open.start, before, html, after.toOption)
-            // Let no html-like thing go unpunished.
-            case None => noEnd
-          }
-        } else {
-          noEnd
+    startElement.findFirstMatchIn(source).map { open =>
+      val hasEnd = open.group(2) == "/"
+      val before = open.before.toOption.map(Text(_))
+      val noEnd = SpanMatch(open.start, before, HTMLSpan(open.matched), open.after.toOption)
+      if (!hasEnd) {
+        hasMatchedClose(source, open.group(1), open.end, 1) match {
+          case Some((close, after)) =>
+            val before = open.before.toOption.map(Text(_))
+            val html = HTMLSpan(source.substring(open.start, close))
+            SpanMatch(open.start, before, html, after.toOption)
+          // Let no html-like thing go unpunished.
+          case None => noEnd
         }
+      } else {
+        noEnd
+      }
     }
   }
 
-  private def hasMatchedClose(source: String, tag: String, from: Int,
-                              opens: Int)
-  : Option[(Int, CharSequence)] = {
+  private def hasMatchedClose(source: String, tag: String, from: Int, opens: Int): Option[(Int, CharSequence)] = {
 
     val opener = ("(?i)<[ ]*" + tag + "[ \t]*[^>]*?(/?+)*>").r
     val closer = ("(?i)</[ ]*" + tag + "[ ]*>").r
@@ -822,11 +846,10 @@ class SpanConverter(definitions: collection.Seq[LinkDefinitionChunk])
   private val matchEntityRE = """&\w+;""".r
 
   def matchEntity(source: String): Option[SpanMatch] =
-    matchEntityRE.findFirstMatchIn(source).map {
-      entityMatch =>
-        val before = entityMatch.before.toOption.map(Text(_))
-        val html = HTMLSpan(entityMatch.matched)
-        SpanMatch(entityMatch.start, before, html, entityMatch.after.toOption)
+    matchEntityRE.findFirstMatchIn(source).map { entityMatch =>
+      val before = entityMatch.before.toOption.map(Text(_))
+      val html = HTMLSpan(entityMatch.matched)
+      SpanMatch(entityMatch.start, before, html, entityMatch.after.toOption)
     }
 
   def matchHTMLComment(source: String): Option[SpanMatch] = {
@@ -842,16 +865,14 @@ class SpanConverter(definitions: collection.Seq[LinkDefinitionChunk])
     } else None
   }
 
-
   private val automaticLinkRE = """<((http:|mailto:|https:)\S+)>""".r
 
   def findAutomaticMatch(source: String): Option[SpanMatch] =
-    automaticLinkRE.findFirstMatchIn(source).map {
-      aMatch =>
-        val url = aMatch.group(1)
-        val before = aMatch.before.toOption.map(Text(_))
-        val link = Link(List(Text(url)), url, None)
-        SpanMatch(aMatch.start, before, link, aMatch.after.toOption)
+    automaticLinkRE.findFirstMatchIn(source).map { aMatch =>
+      val url = aMatch.group(1)
+      val before = aMatch.before.toOption.map(Text(_))
+      val link = Link(List(Text(url)), url, None)
+      SpanMatch(aMatch.start, before, link, aMatch.after.toOption)
     }
 
   // Finds links in the format [name](link) for normal links or ![name](link)
@@ -893,22 +914,26 @@ class SpanConverter(definitions: collection.Seq[LinkDefinitionChunk])
 
             """<(.*)>""".r.findFirstMatchIn(url).foreach(x => url = x.group(1))
 
-            val link = if (imageIdx < firstOpen && imageIdx != -1)
-              ImageLink(convert(wrapped, Nil), url, titleOpt)
-            else
-              Link(convert(wrapped, Nil), url, titleOpt)
+            val link =
+              if (imageIdx < firstOpen && imageIdx != -1)
+                ImageLink(convert(wrapped, Nil), url, titleOpt)
+              else
+                Link(convert(wrapped, Nil), url, titleOpt)
 
-            val start = if (imageIdx != -1) Math.min(imageIdx, firstOpen)
-            else firstOpen
+            val start =
+              if (imageIdx != -1) Math.min(imageIdx, firstOpen)
+              else firstOpen
 
-            val beforeOpt = if (start > 0) Some(Text(source.substring(0, start)))
-            else None
+            val beforeOpt =
+              if (start > 0) Some(Text(source.substring(0, start)))
+              else None
 
             val close = firstClose + secondClose + 1
 
-            val afterOpt = if (source.length > close + 1)
-              Some(source.substring(close + 1))
-            else None
+            val afterOpt =
+              if (source.length > close + 1)
+                Some(source.substring(close + 1))
+              else None
 
             Some(SpanMatch(start, beforeOpt, link, afterOpt))
           }
@@ -927,7 +952,6 @@ class SpanConverter(definitions: collection.Seq[LinkDefinitionChunk])
         val secondPart = source.substring(firstClose + 1)
 
         """^\s*(\[)""".r.findFirstMatchIn(secondPart).flatMap { secondMatch =>
-
           val secondClose =
             secondPart.findBalanced('[', ']', secondMatch.start(1)).get
 
@@ -940,12 +964,10 @@ class SpanConverter(definitions: collection.Seq[LinkDefinitionChunk])
             }
             val precedingText = source.substring(0, firstOpen).toOption.map(Text(_))
 
-            definitions.find(_.id equalsIgnoreCase refID).map {
-              definition =>
-                val link = Link(List(Text(source.substring(firstOpen + 1, firstClose))),
-                  definition.url, definition.title)
-                val after = source.substring(firstClose + secondClose + 2).toOption
-                SpanMatch(firstOpen, precedingText, link, after)
+            definitions.find(_.id equalsIgnoreCase refID).map { definition =>
+              val link = Link(List(Text(source.substring(firstOpen + 1, firstClose))), definition.url, definition.title)
+              val after = source.substring(firstClose + secondClose + 2).toOption
+              SpanMatch(firstOpen, precedingText, link, after)
             }
           }
         }

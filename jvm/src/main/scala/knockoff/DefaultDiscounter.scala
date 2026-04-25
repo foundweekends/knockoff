@@ -8,7 +8,7 @@ you can use the `DefaultDiscounter` object.
     import knockoff.DefaultDiscounter._
     toXHTML( knockoff( markdownString ) )
 
-*/
+ */
 package knockoff
 
 import java.io.File
@@ -26,7 +26,7 @@ usage. Note that a major aim of this discounter is to mimic the usage of
 The `--html4tags` argument will just do nothing, but not be processed as a file.
 
 
-*/
+ */
 
 object DefaultDiscounter extends Discounter with XHTMLWriter {
   def main(args: Array[String]): Unit = try {
@@ -41,15 +41,14 @@ object DefaultDiscounter extends Discounter with XHTMLWriter {
     if (args.isEmpty) {
       val sb = new StringBuilder
       var line: String = Console.in.readLine()
-      while(line != null) {
+      while (line != null) {
         sb.append(line)
         line = Console.in.readLine()
       }
       println(toXHTML(knockoff(sb.toString)).toString)
     } else {
-      args.filter(_ != "--html4tags").foreach {
-        fileName =>
-          println(toXHTML(knockoff(readText(fileName))).toString)
+      args.filter(_ != "--html4tags").foreach { fileName =>
+        println(toXHTML(knockoff(readText(fileName))).toString)
       }
     }
   } catch {
