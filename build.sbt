@@ -142,7 +142,10 @@ val knockoff = projectMatrix
     },
   )
   .nativePlatform(
-    scalaVersions
+    scalaVersions,
+    Def.settings(
+      evictionErrorLevel := Level.Warn,
+    ),
   )
 
 lazy val notPublish = Seq(
