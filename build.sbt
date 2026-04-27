@@ -7,7 +7,7 @@ val tagName = Def.setting {
 val Scala212 = "2.12.21"
 
 val tagOrHash = Def.setting {
-  if (isSnapshot.value) sys.process.Process("git rev-parse HEAD").lineStream_!.head
+  if (isSnapshot.value) sys.process.Process("git rev-parse HEAD").lazyLines_!.head
   else tagName.value
 }
 
@@ -79,8 +79,8 @@ val knockoff = projectMatrix
     buildInfoObject := "KnockoffBuildInfo",
     name := "knockoff",
     libraryDependencies ++= Seq(
-      "org.scalatest" %%% "scalatest-funspec" % "3.2.20" % "test",
-      "org.scalatest" %%% "scalatest-shouldmatchers" % "3.2.20" % "test",
+      "org.scalatest" %% "scalatest-funspec" % "3.2.20" % "test",
+      "org.scalatest" %% "scalatest-shouldmatchers" % "3.2.20" % "test",
     ),
     libraryDependencies ++= Seq(
       "net.sf.jtidy" % "jtidy" % "r938" % "test"
@@ -116,8 +116,8 @@ val knockoff = projectMatrix
       </developers>
     ),
     libraryDependencies ++= Seq(
-      "org.scala-lang.modules" %%% "scala-xml" % "2.4.0",
-      "org.scala-lang.modules" %%% "scala-parser-combinators" % "2.4.0"
+      "org.scala-lang.modules" %% "scala-xml" % "2.4.0",
+      "org.scala-lang.modules" %% "scala-parser-combinators" % "2.4.0"
     )
   )
   .jvmPlatform(
@@ -128,7 +128,7 @@ val knockoff = projectMatrix
     )
   )
   .jsPlatform(
-    scalaVersions,
+    Nil,
     scalacOptions += {
       val a = (LocalRootProject / baseDirectory).value.toURI.toString
       val g = "https://raw.githubusercontent.com/foundweekends/knockoff/" + tagOrHash.value

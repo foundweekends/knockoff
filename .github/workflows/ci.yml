@@ -10,7 +10,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - java: 8
+          - java: 17
           - java: 25
     runs-on: ubuntu-latest
     steps:
@@ -23,6 +23,7 @@ jobs:
     - uses: sbt/setup-sbt@v1
     - shell: bash
       run: sbt -v
+           --server
            -J-Xmx6G
            scalafmtSbtCheck
            scalafmtCheckAll
