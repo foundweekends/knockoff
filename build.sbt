@@ -15,7 +15,7 @@ val unusedWarnings = Def.setting(
   Seq("-Ywarn-unused:imports")
 )
 
-val scalaVersions = Seq(Scala212, "2.13.18", "3.3.7")
+val scalaVersions = Seq(Scala212, "2.13.18", "3.3.8")
 
 val commonSettings = Def.settings(
   releaseTagName := tagName.value,
