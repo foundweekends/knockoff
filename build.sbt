@@ -67,6 +67,8 @@ val commonSettings = Def.settings(
 
 commonSettings
 
+val defaultReleaseOption = "-release:8"
+
 val knockoff = projectMatrix
   .in(file("."))
   .defaultAxes()
@@ -125,25 +127,43 @@ val knockoff = projectMatrix
     Def.settings(
       Compile / unmanagedSourceDirectories += file("jvm/src/main/scala").getAbsoluteFile,
       Test / unmanagedSourceDirectories += file("jvm/src/test/scala").getAbsoluteFile,
+      scalacOptions ++= {
+        if (scalaVersion.value.startsWith("3.3.")) {
+          Seq(
+            "-Yfuture-lazy-vals",
+            "-release:11",
+          )
+        } else if (scalaBinaryVersion.value == "3") {
+          Nil
+        } else {
+          Seq(
+            defaultReleaseOption,
+          )
+        }
+      },
     )
   )
   .jsPlatform(
     scalaVersions,
-    scalacOptions += {
-      val a = (LocalRootProject / baseDirectory).value.toURI.toString
-      val g = "https://raw.githubusercontent.com/foundweekends/knockoff/" + tagOrHash.value
-      val key = CrossVersion.partialVersion(scalaVersion.value) match {
-        case Some((3, _)) =>
-          "-scalajs-mapSourceURI"
-        case _ =>
-          "-P:scalajs:mapSourceURI"
-      }
-      s"${key}:$a->$g/"
-    },
+    Def.settings(
+      scalacOptions += defaultReleaseOption,
+      scalacOptions += {
+        val a = (LocalRootProject / baseDirectory).value.toURI.toString
+        val g = "https://raw.githubusercontent.com/foundweekends/knockoff/" + tagOrHash.value
+        val key = CrossVersion.partialVersion(scalaVersion.value) match {
+          case Some((3, _)) =>
+            "-scalajs-mapSourceURI"
+          case _ =>
+            "-P:scalajs:mapSourceURI"
+        }
+        s"${key}:$a->$g/"
+      },
+    ),
   )
   .nativePlatform(
     scalaVersions,
     Def.settings(
+      scalacOptions += defaultReleaseOption,
       evictionErrorLevel := Level.Warn,
     ),
   )

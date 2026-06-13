@@ -10,7 +10,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - java: 8
+          - java: 11
           - java: 25
     runs-on: ubuntu-latest
     steps:
