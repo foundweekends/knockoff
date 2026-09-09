@@ -121,8 +121,8 @@ val knockoff = projectMatrix
       </developers>
     ),
     libraryDependencies ++= Seq(
-      "org.scala-lang.modules" %% "scala-xml" % "2.4.0",
-      "org.scala-lang.modules" %% "scala-parser-combinators" % "2.4.0"
+      "org.scala-lang.modules" %% "scala-xml" % "2.5.0",
+      "org.scala-lang.modules" %% "scala-parser-combinators" % "2.5.0"
     )
   )
   .jvmPlatform(
